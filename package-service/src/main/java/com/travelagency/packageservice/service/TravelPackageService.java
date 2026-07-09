@@ -101,6 +101,31 @@ public class TravelPackageService {
         return repository.save(travelPackage);
     }
 
+    // Ajusta la cantidad de cupos reservados (delta positivo reserva cupos, negativo los libera).
+    // Usado por booking-service al confirmar/cancelar/expirar reservas. Sincroniza el estado
+    // AVAILABLE/SOLD_OUT segun si quedan cupos, sin tocar estados CANCELLED/EXPIRED.
+    public TravelPackage adjustBookedSlots(Long id, int delta) {
+        TravelPackage travelPackage = getPackageById(id);
+
+        int newBookedSlots = travelPackage.getBookedSlots() + delta;
+        if (newBookedSlots < 0) {
+            throw new BusinessRuleException("No se pueden liberar mas cupos de los que estan reservados");
+        }
+        if (newBookedSlots > travelPackage.getTotalSlots()) {
+            throw new BusinessRuleException("No hay cupos suficientes disponibles");
+        }
+
+        travelPackage.setBookedSlots(newBookedSlots);
+
+        if (newBookedSlots >= travelPackage.getTotalSlots() && travelPackage.getStatus() == PackageStatus.AVAILABLE) {
+            travelPackage.setStatus(PackageStatus.SOLD_OUT);
+        } else if (newBookedSlots < travelPackage.getTotalSlots() && travelPackage.getStatus() == PackageStatus.SOLD_OUT) {
+            travelPackage.setStatus(PackageStatus.AVAILABLE);
+        }
+
+        return repository.save(travelPackage);
+    }
+
     // Cambia el estado del paquete, respetando que uno cancelado no pueda modificarse
     public TravelPackage changeStatus(Long id, PackageStatus newStatus) {
         TravelPackage travelPackage = getPackageById(id);

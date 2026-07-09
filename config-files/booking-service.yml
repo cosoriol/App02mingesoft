@@ -23,3 +23,14 @@ eureka:
   instance:
     prefer-ip-address: true
     instance-id: ${spring.application.name}:${random.value}
+
+# Configuracion de descuentos acumulables para el proceso de reserva (Epica 4)
+app:
+  discount:
+    group-threshold: 4
+    group-percentage: 5.0
+    frequent-threshold: 3
+    frequent-percentage: 10.0
+    multi-package-days: 30
+    multi-package-percentage: 3.0
+    max-total-discount: 20.0

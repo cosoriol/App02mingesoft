@@ -83,4 +83,11 @@ public class PackageController {
         TravelPackage updated = service.changeStatus(id, status);
         return PackageResponse.fromEntity(updated);
     }
+
+    // Ajusta cupos reservados (usado por booking-service): delta positivo reserva, negativo libera
+    @PatchMapping("/{id}/slots")
+    public PackageResponse adjustSlots(@PathVariable Long id, @RequestParam int delta) {
+        TravelPackage updated = service.adjustBookedSlots(id, delta);
+        return PackageResponse.fromEntity(updated);
+    }
 }
