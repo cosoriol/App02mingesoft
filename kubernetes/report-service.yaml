@@ -1,0 +1,52 @@
+# Deployment y Service del microservicio report-service
+# Nota: server.port=0 asigna un puerto aleatorio; el ruteo real ocurre
+# via Eureka (registro por IP de pod), no via este Service de Kubernetes.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: report-service
+  namespace: travelagency
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: report-service
+  template:
+    metadata:
+      labels:
+        app: report-service
+    spec:
+      containers:
+        - name: report-service
+          image: travelagency/report-service:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: SPRING_CONFIG_IMPORT
+              value: "configserver:http://config-server:8888"
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              value: "http://eureka-server:8761/eureka/"
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://postgres:5432/report_db"
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-credentials
+                  key: POSTGRES_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-credentials
+                  key: POSTGRES_PASSWORD
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: report-service
+  namespace: travelagency
+spec:
+  type: ClusterIP
+  selector:
+    app: report-service
+  ports:
+    - port: 8080
+      targetPort: 8080

@@ -1,0 +1,6 @@
+# Configuracion minima: el resto llega desde el Config Server
+spring:
+  application:
+    name: search-service
+  config:
+    import: optional:configserver:http://localhost:8888

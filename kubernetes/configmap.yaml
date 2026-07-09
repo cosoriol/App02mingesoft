@@ -1,0 +1,24 @@
+# Credenciales de PostgreSQL compartidas por los microservicios
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-credentials
+  namespace: travelagency
+data:
+  POSTGRES_USER: "postgres"
+  POSTGRES_PASSWORD: "postgres"
+---
+# Script de inicializacion: crea una base de datos por microservicio
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-script
+  namespace: travelagency
+data:
+  init-multiple-dbs.sql: |
+    CREATE DATABASE package_db;
+    CREATE DATABASE search_db;
+    CREATE DATABASE booking_db;
+    CREATE DATABASE payment_db;
+    CREATE DATABASE confirmation_db;
+    CREATE DATABASE report_db;

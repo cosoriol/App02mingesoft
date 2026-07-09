@@ -1,0 +1,52 @@
+# Deployment y Service del microservicio confirmation-service
+# Nota: server.port=0 asigna un puerto aleatorio; el ruteo real ocurre
+# via Eureka (registro por IP de pod), no via este Service de Kubernetes.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: confirmation-service
+  namespace: travelagency
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: confirmation-service
+  template:
+    metadata:
+      labels:
+        app: confirmation-service
+    spec:
+      containers:
+        - name: confirmation-service
+          image: travelagency/confirmation-service:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: SPRING_CONFIG_IMPORT
+              value: "configserver:http://config-server:8888"
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              value: "http://eureka-server:8761/eureka/"
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://postgres:5432/confirmation_db"
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-credentials
+                  key: POSTGRES_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-credentials
+                  key: POSTGRES_PASSWORD
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: confirmation-service
+  namespace: travelagency
+spec:
+  type: ClusterIP
+  selector:
+    app: confirmation-service
+  ports:
+    - port: 8080
+      targetPort: 8080

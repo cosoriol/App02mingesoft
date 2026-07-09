@@ -1,0 +1,5 @@
+# Namespace dedicado a la infraestructura de TravelAgency
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: travelagency
