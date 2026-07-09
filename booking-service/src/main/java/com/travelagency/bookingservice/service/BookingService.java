@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 // Orquesta el proceso de reserva: valida el paquete contra package-service, calcula descuentos
@@ -93,6 +94,16 @@ public class BookingService {
     public List<BookingResponse> getAllBookings(String userId) {
         validateIsAdmin(userId);
         return bookingRepository.findAll().stream()
+                .map(booking -> toResponse(booking, fetchPackageSafely(booking.getPackageId())))
+                .toList();
+    }
+
+    // Reservas creadas dentro de un rango de fechas, para reportes (llamado por report-service)
+    @Transactional(readOnly = true)
+    public List<BookingResponse> getBookingsByDateRange(LocalDate startDate, LocalDate endDate) {
+        LocalDateTime start = startDate.atStartOfDay();
+        LocalDateTime end = endDate.atTime(LocalTime.MAX);
+        return bookingRepository.findByCreatedAtBetween(start, end).stream()
                 .map(booking -> toResponse(booking, fetchPackageSafely(booking.getPackageId())))
                 .toList();
     }

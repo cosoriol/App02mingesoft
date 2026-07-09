@@ -11,8 +11,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 // Expone el proceso de pago simulado de reservas (Epica 5)
 @RestController
@@ -39,5 +42,11 @@ public class PaymentController {
     @GetMapping("/summary/{bookingId}")
     public PaymentSummaryResponse getPaymentSummary(@PathVariable Long bookingId) {
         return paymentService.getPaymentSummary(bookingId);
+    }
+
+    // Llamado por report-service para no hacer una consulta HTTP por cada reserva
+    @GetMapping("/by-bookings")
+    public List<PaymentResponse> getPaymentsByBookingIds(@RequestParam List<Long> bookingIds) {
+        return paymentService.getPaymentsByBookingIds(bookingIds);
     }
 }

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.List;
 
 // Expone el proceso de reserva de paquetes turisticos (Epica 4)
@@ -43,6 +44,14 @@ public class BookingController {
     @GetMapping("/user/{userId}")
     public List<BookingResponse> getBookingsByUser(@PathVariable String userId) {
         return bookingService.getBookingsByUser(userId);
+    }
+
+    // Llamado por report-service para generar reportes; no requiere userId porque
+    // no es una accion de usuario sino una consulta de sistema para reportes de admin
+    @GetMapping("/date-range")
+    public List<BookingResponse> getBookingsByDateRange(@RequestParam LocalDate startDate,
+                                                         @RequestParam LocalDate endDate) {
+        return bookingService.getBookingsByDateRange(startDate, endDate);
     }
 
     @GetMapping("/{id}")

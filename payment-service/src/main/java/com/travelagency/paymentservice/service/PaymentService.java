@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 // Orquesta el pago simulado: valida la reserva contra booking-service, aprueba el pago
 // (siempre exitoso) y confirma la reserva
@@ -68,6 +69,14 @@ public class PaymentService {
     public PaymentSummaryResponse getPaymentSummary(Long bookingId) {
         BookingResponse booking = bookingClient.getBooking(bookingId);
         return PaymentSummaryResponse.fromBooking(booking);
+    }
+
+    // Consulta masiva usada por report-service para no hacer una llamada HTTP por cada reserva
+    @Transactional(readOnly = true)
+    public List<PaymentResponse> getPaymentsByBookingIds(List<Long> bookingIds) {
+        return paymentRepository.findByBookingIdIn(bookingIds).stream()
+                .map(PaymentResponse::fromEntity)
+                .toList();
     }
 
     private void validateBookingPayable(BookingResponse booking) {
