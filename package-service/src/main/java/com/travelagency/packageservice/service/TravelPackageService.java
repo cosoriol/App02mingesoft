@@ -6,6 +6,7 @@ import com.travelagency.packageservice.entity.TravelPackage;
 import com.travelagency.packageservice.exception.BusinessRuleException;
 import com.travelagency.packageservice.exception.ResourceNotFoundException;
 import com.travelagency.packageservice.repository.TravelPackageRepository;
+import com.travelagency.packageservice.repository.TravelPackageSpecifications;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,7 +68,7 @@ public class TravelPackageService {
 
     @Transactional(readOnly = true)
     public List<TravelPackage> searchPackages(String destination, BigDecimal minPrice, BigDecimal maxPrice, LocalDate startDate) {
-        return repository.searchPackages(destination, minPrice, maxPrice, startDate);
+        return repository.findAll(TravelPackageSpecifications.withFilters(destination, minPrice, maxPrice, startDate));
     }
 
     // Actualiza un paquete existente validando que no se rompan reservas ya confirmadas

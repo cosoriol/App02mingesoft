@@ -1,7 +1,7 @@
-package com.travelagency.packageservice.repository;
+package com.travelagency.searchservice.repository;
 
-import com.travelagency.packageservice.entity.PackageStatus;
-import com.travelagency.packageservice.entity.TravelPackage;
+import com.travelagency.searchservice.entity.PackageStatus;
+import com.travelagency.searchservice.entity.TravelPackage;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
