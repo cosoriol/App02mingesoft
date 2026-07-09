@@ -5,4 +5,68 @@ const api = axios.create({
   baseURL: 'http://localhost:8080/api',
 })
 
+// Extrae un mensaje de error legible desde una respuesta de axios.
+// El backend responde errores con { message } o, en validaciones, con { errors: { campo: mensaje } }.
+export function getErrorMessage(error) {
+  const data = error?.response?.data
+  if (data?.errors && typeof data.errors === 'object') {
+    return Object.values(data.errors).join('. ')
+  }
+  if (data?.message) return data.message
+  if (error?.message) return error.message
+  return 'Ocurrio un error inesperado. Intenta nuevamente.'
+}
+
+// --- Paquetes (package-service) ---
+
+export function getAvailablePackages() {
+  return api.get('/packages/available').then((res) => res.data)
+}
+
+export function getPackageById(id) {
+  return api.get(`/packages/${id}`).then((res) => res.data)
+}
+
+export function searchPackages(filters) {
+  const params = {}
+  if (filters.destination) params.destination = filters.destination
+  if (filters.minPrice !== '' && filters.minPrice != null) params.minPrice = filters.minPrice
+  if (filters.maxPrice !== '' && filters.maxPrice != null) params.maxPrice = filters.maxPrice
+  if (filters.startDate) params.startDate = filters.startDate
+  return api.get('/packages/search', { params }).then((res) => res.data)
+}
+
+// --- Reservas (booking-service) ---
+
+export function createBooking(userId, booking) {
+  return api.post('/bookings', booking, { params: { userId } }).then((res) => res.data)
+}
+
+// --- Pagos (payment-service) ---
+
+export function getPaymentSummary(bookingId) {
+  return api.get(`/payments/summary/${bookingId}`).then((res) => res.data)
+}
+
+export function processPayment(payment) {
+  return api.post('/payments', payment).then((res) => res.data)
+}
+
+// --- Confirmaciones y seguimiento (confirmation-service) ---
+
+export function getPaymentVoucher(bookingId) {
+  return api.get(`/confirmations/${bookingId}/voucher`).then((res) => res.data)
+}
+
+export function getMyBookings(userId) {
+  return api.get('/confirmations/my-bookings', { params: { userId } }).then((res) => res.data)
+}
+
+// El rol CLIENT es el unico disponible desde el frontend: no hay autenticacion real todavia
+export function cancelBooking(bookingId, userId) {
+  return api
+    .patch(`/confirmations/${bookingId}/cancel`, null, { params: { userId, role: 'CLIENT' } })
+    .then((res) => res.data)
+}
+
 export default api
