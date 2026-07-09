@@ -109,7 +109,9 @@ public class BookingService {
         }
 
         booking.setStatus(BookingStatus.CONFIRMED);
-        Booking saved = bookingRepository.save(booking);
+        // saveAndFlush (no solo save) para que @PreUpdate corra ya, dentro de esta transaccion:
+        // si no, updatedAt en la respuesta queda desactualizado hasta el commit
+        Booking saved = bookingRepository.saveAndFlush(booking);
 
         bookingClient.updatePackageBookedSlots(saved.getPackageId(), saved.getPassengerCount());
 
@@ -130,7 +132,9 @@ public class BookingService {
 
         BookingStatus previousStatus = booking.getStatus();
         booking.setStatus(BookingStatus.CANCELLED);
-        Booking saved = bookingRepository.save(booking);
+        // saveAndFlush (no solo save) para que @PreUpdate corra ya, dentro de esta transaccion:
+        // si no, updatedAt en la respuesta queda desactualizado hasta el commit
+        Booking saved = bookingRepository.saveAndFlush(booking);
 
         releaseSlotsIfConfirmed(saved, previousStatus);
 
@@ -227,6 +231,8 @@ public class BookingService {
                 booking.getPackageId(),
                 packageInfo != null ? packageInfo.getName() : null,
                 packageInfo != null ? packageInfo.getDestination() : null,
+                packageInfo != null ? packageInfo.getStartDate() : null,
+                packageInfo != null ? packageInfo.getEndDate() : null,
                 booking.getPassengerCount(),
                 booking.getBaseAmount(),
                 booking.getDiscountPercentage(),
@@ -234,6 +240,7 @@ public class BookingService {
                 booking.getDiscountDetails(),
                 booking.getTotalAmount(),
                 booking.getStatus(),
-                booking.getCreatedAt());
+                booking.getCreatedAt(),
+                booking.getUpdatedAt());
     }
 }

@@ -1,12 +1,17 @@
-package com.travelagency.bookingservice.dto;
+package com.travelagency.confirmationservice.dto;
 
-import com.travelagency.bookingservice.entity.BookingStatus;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-// Datos de salida expuestos por la API para una reserva
+// Representa la reserva tal como la expone booking-service.
+// Se usa unicamente para deserializar la respuesta HTTP (via BookingServiceClient/RestTemplate);
+// confirmation-service no persiste ni gestiona estos datos, solo los consulta.
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class BookingResponse {
 
     private final Long id;
@@ -26,11 +31,23 @@ public class BookingResponse {
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
-    public BookingResponse(Long id, String userId, Long packageId, String packageName, String destination,
-                            LocalDate startDate, LocalDate endDate, Integer passengerCount, BigDecimal baseAmount,
-                            BigDecimal discountPercentage, BigDecimal discountAmount, String discountDetails,
-                            BigDecimal totalAmount, BookingStatus status, LocalDateTime createdAt,
-                            LocalDateTime updatedAt) {
+    @JsonCreator
+    public BookingResponse(@JsonProperty("id") Long id,
+                            @JsonProperty("userId") String userId,
+                            @JsonProperty("packageId") Long packageId,
+                            @JsonProperty("packageName") String packageName,
+                            @JsonProperty("destination") String destination,
+                            @JsonProperty("startDate") LocalDate startDate,
+                            @JsonProperty("endDate") LocalDate endDate,
+                            @JsonProperty("passengerCount") Integer passengerCount,
+                            @JsonProperty("baseAmount") BigDecimal baseAmount,
+                            @JsonProperty("discountPercentage") BigDecimal discountPercentage,
+                            @JsonProperty("discountAmount") BigDecimal discountAmount,
+                            @JsonProperty("discountDetails") String discountDetails,
+                            @JsonProperty("totalAmount") BigDecimal totalAmount,
+                            @JsonProperty("status") BookingStatus status,
+                            @JsonProperty("createdAt") LocalDateTime createdAt,
+                            @JsonProperty("updatedAt") LocalDateTime updatedAt) {
         this.id = id;
         this.userId = userId;
         this.packageId = packageId;
