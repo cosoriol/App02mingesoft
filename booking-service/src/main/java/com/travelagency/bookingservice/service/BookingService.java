@@ -97,6 +97,25 @@ public class BookingService {
                 .toList();
     }
 
+    // Confirma una reserva PENDING tras un pago exitoso (llamado por payment-service).
+    // Es la unica accion que efectivamente reserva cupos en package-service: hasta este
+    // punto la reserva era solo una intencion, no un compromiso de cupo.
+    public BookingResponse confirmBooking(Long bookingId) {
+        Booking booking = findBookingOrThrow(bookingId);
+
+        if (booking.getStatus() != BookingStatus.PENDING) {
+            throw new BusinessRuleException(
+                    "Solo se puede confirmar una reserva en estado PENDING (actual: " + booking.getStatus() + ")");
+        }
+
+        booking.setStatus(BookingStatus.CONFIRMED);
+        Booking saved = bookingRepository.save(booking);
+
+        bookingClient.updatePackageBookedSlots(saved.getPackageId(), saved.getPassengerCount());
+
+        return toResponse(saved, fetchPackageSafely(saved.getPackageId()));
+    }
+
     // Cancela una reserva y libera los cupos que tuviera comprometidos
     public BookingResponse cancelBooking(Long bookingId, String userId) {
         Booking booking = findBookingOrThrow(bookingId);

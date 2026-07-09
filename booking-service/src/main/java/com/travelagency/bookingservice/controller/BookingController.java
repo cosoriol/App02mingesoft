@@ -54,4 +54,11 @@ public class BookingController {
     public BookingResponse cancelBooking(@PathVariable Long id, @RequestParam String userId) {
         return bookingService.cancelBooking(id, userId);
     }
+
+    // Accion de sistema disparada por payment-service tras un pago exitoso: no requiere
+    // userId porque no es una accion de usuario, es una transicion de estado del proceso
+    @PatchMapping("/{id}/confirm")
+    public BookingResponse confirmBooking(@PathVariable Long id) {
+        return bookingService.confirmBooking(id);
+    }
 }
