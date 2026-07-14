@@ -103,6 +103,25 @@ services:
       retries: 10
       start_period: 30s
 
+  # Microservicio de usuarios y autenticacion (Epica 1)
+  user-service:
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+    container_name: user-service
+    restart: always
+    environment:
+      SPRING_CONFIG_IMPORT: configserver:http://config-server:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/user_db
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - travel-network
+
   # Microservicio de paquetes turisticos
   package-service:
     build:
@@ -229,6 +248,7 @@ services:
     ports:
       - "3001:80"
     depends_on:
+      - user-service
       - package-service
       - search-service
       - booking-service

@@ -18,7 +18,7 @@ function formatPrice(value) {
 }
 
 function MyBookingsPage() {
-  const { userId } = useAuth()
+  const { userId, role } = useAuth()
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -41,7 +41,7 @@ function MyBookingsPage() {
     if (!window.confirm('¿Seguro que deseas cancelar esta reserva?')) return
 
     setCancellingId(bookingId)
-    cancelBooking(bookingId, userId)
+    cancelBooking(bookingId, userId, role)
       .then(loadBookings)
       .catch((err) => window.alert(getErrorMessage(err)))
       .finally(() => setCancellingId(null))

@@ -1,18 +1,19 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext.jsx'
+import { register as registerRequest, getErrorMessage } from '../services/api.js'
 
-// Reglas de contraseña fuerte, evaluadas en vivo mientras el usuario escribe
+// Reglas de contraseña fuerte, evaluadas en vivo mientras el usuario escribe.
+// Deben coincidir exactamente con las que valida user-service (UserService.validatePasswordStrength).
 const PASSWORD_RULES = [
   { test: (pw) => pw.length >= 8, label: 'Al menos 8 caracteres' },
   { test: (pw) => /[A-Z]/.test(pw), label: 'Una letra mayúscula' },
   { test: (pw) => /[a-z]/.test(pw), label: 'Una letra minúscula' },
   { test: (pw) => /\d/.test(pw), label: 'Un número' },
-  { test: (pw) => /[^A-Za-z0-9]/.test(pw), label: 'Un carácter especial' },
+  { test: (pw) => /[@#$%^&+=!*]/.test(pw), label: 'Un carácter especial (@#$%^&+=!*)' },
 ]
 
-// Pagina de registro. No hay backend de usuarios todavia (llegara con Keycloak): por
-// ahora se simula el registro guardando un userId fijo en localStorage.
+// Pagina de registro. Crea la cuenta en user-service (Epica 1); no inicia sesion
+// automaticamente, redirige a login para que el usuario entre con su propia contrasena.
 function RegisterPage() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -22,7 +23,6 @@ function RegisterPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const { login } = useAuth()
   const navigate = useNavigate()
 
   const passwordValid = PASSWORD_RULES.every((rule) => rule.test(password))
@@ -45,11 +45,10 @@ function RegisterPage() {
     }
 
     setLoading(true)
-    setTimeout(() => {
-      login('2', name.trim())
-      setLoading(false)
-      navigate('/home')
-    }, 300)
+    registerRequest({ fullName: name.trim(), email: email.trim(), phone, password })
+      .then(() => navigate('/', { state: { registered: true } }))
+      .catch((err) => setError(getErrorMessage(err)))
+      .finally(() => setLoading(false))
   }
 
   return (

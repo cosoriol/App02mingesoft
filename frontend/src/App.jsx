@@ -9,6 +9,7 @@ import BookingPage from './pages/BookingPage.jsx'
 import PaymentPage from './pages/PaymentPage.jsx'
 import PaymentConfirmationPage from './pages/PaymentConfirmationPage.jsx'
 import MyBookingsPage from './pages/MyBookingsPage.jsx'
+import ReportsPage from './pages/ReportsPage.jsx'
 
 // Componente raiz: define el enrutamiento de toda la aplicacion
 function App() {
@@ -63,6 +64,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <MyBookingsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reports"
+            element={
+              <ProtectedRoute adminOnly>
+                <ReportsPage />
               </ProtectedRoute>
             }
           />

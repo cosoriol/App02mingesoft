@@ -230,6 +230,12 @@ h1, h2, h3 {
   border: 1px solid rgba(185, 28, 28, 0.2);
 }
 
+.alert-success {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+  border: 1px solid rgba(21, 128, 61, 0.2);
+}
+
 .loading-text,
 .empty-text {
   color: var(--color-text-muted);
@@ -673,6 +679,73 @@ h1, h2, h3 {
   gap: 0.75rem;
   flex-wrap: wrap;
   align-items: center;
+}
+
+/* --- Reportes (dashboard, Epica 7) --- */
+.report-section {
+  margin-top: 2rem;
+}
+
+.report-section h2 {
+  margin-bottom: 0.75rem;
+}
+
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.stat-card {
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+}
+
+.stat-card-label {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  margin: 0 0 0.35rem;
+}
+
+.stat-card-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.report-table-wrapper {
+  overflow-x: auto;
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.report-table th,
+.report-table td {
+  text-align: left;
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.report-table th {
+  color: var(--color-text-muted);
+  font-weight: 600;
+  background: var(--color-bg);
+}
+
+.report-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 /* --- Responsive --- */

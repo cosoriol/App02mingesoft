@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
+import { login as loginRequest, getErrorMessage } from '../services/api.js'
 
-// Pagina de inicio de sesion. No hay backend de autenticacion todavia (llegara con
-// Keycloak): por ahora se simula el login guardando un userId fijo en localStorage.
+// Pagina de inicio de sesion. Valida email/contrasena contra user-service (Epica 1).
 function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -12,22 +12,20 @@ function LoginPage() {
 
   const { login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
 
   function handleSubmit(event) {
     event.preventDefault()
     setError('')
-
-    if (!email.trim() || !password) {
-      setError('Ingresa tu email y contraseña')
-      return
-    }
-
     setLoading(true)
-    setTimeout(() => {
-      login('1', email.split('@')[0])
-      setLoading(false)
-      navigate('/home')
-    }, 300)
+
+    loginRequest(email, password)
+      .then((data) => {
+        login(String(data.user.id), data.user.fullName, data.user.role)
+        navigate('/home')
+      })
+      .catch((err) => setError(getErrorMessage(err)))
+      .finally(() => setLoading(false))
   }
 
   return (
@@ -36,6 +34,9 @@ function LoginPage() {
         <h1>TravelAgency</h1>
         <p className="auth-subtitle">Inicia sesión para continuar</p>
 
+        {location.state?.registered && (
+          <div className="alert alert-success">Cuenta creada. Ya puedes iniciar sesión.</div>
+        )}
         {error && <div className="alert alert-error">{error}</div>}
 
         <label className="form-field">

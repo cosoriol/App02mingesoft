@@ -30,6 +30,7 @@
         <module>config-server</module>
         <module>eureka-server</module>
         <module>api-gateway</module>
+        <module>user-service</module>
         <module>package-service</module>
         <module>search-service</module>
         <module>booking-service</module>

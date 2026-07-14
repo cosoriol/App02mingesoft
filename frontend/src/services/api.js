@@ -17,6 +17,16 @@ export function getErrorMessage(error) {
   return 'Ocurrio un error inesperado. Intenta nuevamente.'
 }
 
+// --- Autenticacion (user-service) ---
+
+export function login(email, password) {
+  return api.post('/auth/login', { email, password }).then((res) => res.data)
+}
+
+export function register(payload) {
+  return api.post('/auth/register', payload).then((res) => res.data)
+}
+
 // --- Paquetes (package-service) ---
 
 export function getAvailablePackages() {
@@ -62,11 +72,20 @@ export function getMyBookings(userId) {
   return api.get('/confirmations/my-bookings', { params: { userId } }).then((res) => res.data)
 }
 
-// El rol CLIENT es el unico disponible desde el frontend: no hay autenticacion real todavia
-export function cancelBooking(bookingId, userId) {
+export function cancelBooking(bookingId, userId, role) {
   return api
-    .patch(`/confirmations/${bookingId}/cancel`, null, { params: { userId, role: 'CLIENT' } })
+    .patch(`/confirmations/${bookingId}/cancel`, null, { params: { userId, role } })
     .then((res) => res.data)
+}
+
+// --- Reportes (report-service, Epica 7) ---
+
+export function getSalesReport(role, dateRange) {
+  return api.post('/reports/sales', dateRange, { params: { role } }).then((res) => res.data)
+}
+
+export function getPackageRanking(role, dateRange) {
+  return api.post('/reports/ranking', dateRange, { params: { role } }).then((res) => res.data)
 }
 
 export default api

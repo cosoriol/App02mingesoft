@@ -10,16 +10,32 @@ Spring Cloud 2023.0.0 (Leyton) y Java 17.
 | config-server          | 8888           | Configuracion centralizada (Spring Cloud Config) |
 | eureka-server          | 8761           | Descubrimiento de servicios (Netflix Eureka)   |
 | api-gateway            | 8080           | Puerta de enlace (Spring Cloud Gateway)        |
+| user-service           | 0 (aleatorio)  | Usuarios, registro y login (Epica 1)           |
 | package-service        | 0 (aleatorio)  | Gestion de paquetes turisticos                 |
 | search-service         | 0 (aleatorio)  | Busqueda de paquetes/ofertas                   |
 | booking-service        | 0 (aleatorio)  | Reservas                                       |
 | payment-service        | 0 (aleatorio)  | Pagos                                          |
 | confirmation-service   | 0 (aleatorio)  | Confirmaciones de reserva                      |
 | report-service         | 0 (aleatorio)  | Reportes                                       |
-| frontend               | 3000           | React + Vite, servido con Nginx                |
+| frontend               | 3001           | React + Vite, servido con Nginx                |
 
-Los 6 microservicios usan `server.port=0` (puerto aleatorio) y se registran en Eureka;
+Los 7 microservicios usan `server.port=0` (puerto aleatorio) y se registran en Eureka;
 el API Gateway enruta hacia ellos mediante `lb://` (balanceo de carga vía Eureka).
+
+`user-service` valida email/contrasena de verdad contra la base de datos (BCrypt, bloqueo
+de cuenta tras 5 intentos fallidos, cuentas CLIENT/ADMIN) — no hay login simulado. El
+frontend consume `POST /api/auth/register` y `POST /api/auth/login`, guarda el rol
+devuelto, y usa ese rol para condicionar la UI (ej. el link "Reportes" solo aparece para
+ADMIN). Para promover un usuario a ADMIN por ahora hay que hacerlo a mano en la base de
+datos (no hay panel de administracion de roles):
+
+```bash
+docker exec postgres psql -U postgres -d user_db -c "UPDATE users SET role = 'ADMIN' WHERE email = 'tu@email.com';"
+```
+
+El dashboard de reportes (`/reports` en el frontend, Epica 7) consume
+`POST /api/reports/sales` y `POST /api/reports/ranking` de `report-service`; el backend
+revalida que el rol enviado sea ADMIN independientemente de lo que filtre el frontend.
 
 ## Requisitos previos
 
@@ -75,6 +91,7 @@ publica (o carga en el clúster) las imágenes de cada módulo, por ejemplo:
 docker build -t travelagency/config-server:latest -f config-server/Dockerfile .
 docker build -t travelagency/eureka-server:latest -f eureka-server/Dockerfile .
 docker build -t travelagency/api-gateway:latest -f api-gateway/Dockerfile .
+docker build -t travelagency/user-service:latest -f user-service/Dockerfile .
 docker build -t travelagency/package-service:latest -f package-service/Dockerfile .
 docker build -t travelagency/search-service:latest -f search-service/Dockerfile .
 docker build -t travelagency/booking-service:latest -f booking-service/Dockerfile .
@@ -97,6 +114,7 @@ kubectl apply -f kubernetes/postgres.yaml
 kubectl apply -f kubernetes/config-server.yaml
 kubectl apply -f kubernetes/eureka-server.yaml
 kubectl apply -f kubernetes/api-gateway.yaml
+kubectl apply -f kubernetes/user-service.yaml
 kubectl apply -f kubernetes/package-service.yaml
 kubectl apply -f kubernetes/search-service.yaml
 kubectl apply -f kubernetes/booking-service.yaml

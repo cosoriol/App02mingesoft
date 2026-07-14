@@ -16,6 +16,7 @@ metadata:
   namespace: travelagency
 data:
   init-multiple-dbs.sql: |
+    CREATE DATABASE user_db;
     CREATE DATABASE package_db;
     CREATE DATABASE search_db;
     CREATE DATABASE booking_db;
