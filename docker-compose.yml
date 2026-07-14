@@ -12,16 +12,26 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: postgres
+    restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+    # 5433 (no 5432) en el host para coexistir con otros proyectos locales
+    # que ya usen el puerto default de Postgres/MySQL. La conexion entre
+    # contenedores sigue siendo "postgres:5432" (puerto interno, sin cambios).
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./postgres/init-multiple-dbs.sql:/docker-entrypoint-initdb.d/init-multiple-dbs.sql
     networks:
       - travel-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   # Servidor de configuracion centralizada
   config-server:
@@ -29,14 +39,22 @@ services:
       context: .
       dockerfile: config-server/Dockerfile
     container_name: config-server
+    restart: always
     ports:
       - "8888:8888"
     volumes:
       - ./config-files:/root/App02Mingesoft/config-files:ro
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - travel-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8888/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   # Servidor de descubrimiento de servicios (Eureka)
   eureka-server:
@@ -44,14 +62,22 @@ services:
       context: .
       dockerfile: eureka-server/Dockerfile
     container_name: eureka-server
+    restart: always
     environment:
       SPRING_CONFIG_IMPORT: configserver:http://config-server:8888
     ports:
       - "8761:8761"
     depends_on:
-      - config-server
+      config-server:
+        condition: service_healthy
     networks:
       - travel-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   # Puerta de enlace (API Gateway)
   api-gateway:
@@ -59,15 +85,23 @@ services:
       context: .
       dockerfile: api-gateway/Dockerfile
     container_name: api-gateway
+    restart: always
     environment:
       SPRING_CONFIG_IMPORT: configserver:http://config-server:8888
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
     ports:
       - "8080:8080"
     depends_on:
-      - eureka-server
+      eureka-server:
+        condition: service_healthy
     networks:
       - travel-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   # Microservicio de paquetes turisticos
   package-service:
@@ -75,12 +109,16 @@ services:
       context: .
       dockerfile: package-service/Dockerfile
     container_name: package-service
+    restart: always
     environment:
       SPRING_CONFIG_IMPORT: configserver:http://config-server:8888
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/package_db
     depends_on:
-      - api-gateway
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     networks:
       - travel-network
 
@@ -90,12 +128,16 @@ services:
       context: .
       dockerfile: search-service/Dockerfile
     container_name: search-service
+    restart: always
     environment:
       SPRING_CONFIG_IMPORT: configserver:http://config-server:8888
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/search_db
     depends_on:
-      - api-gateway
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     networks:
       - travel-network
 
@@ -105,12 +147,16 @@ services:
       context: .
       dockerfile: booking-service/Dockerfile
     container_name: booking-service
+    restart: always
     environment:
       SPRING_CONFIG_IMPORT: configserver:http://config-server:8888
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/booking_db
     depends_on:
-      - api-gateway
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     networks:
       - travel-network
 
@@ -120,12 +166,16 @@ services:
       context: .
       dockerfile: payment-service/Dockerfile
     container_name: payment-service
+    restart: always
     environment:
       SPRING_CONFIG_IMPORT: configserver:http://config-server:8888
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/payment_db
     depends_on:
-      - api-gateway
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     networks:
       - travel-network
 
@@ -135,12 +185,16 @@ services:
       context: .
       dockerfile: confirmation-service/Dockerfile
     container_name: confirmation-service
+    restart: always
     environment:
       SPRING_CONFIG_IMPORT: configserver:http://config-server:8888
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/confirmation_db
     depends_on:
-      - api-gateway
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     networks:
       - travel-network
 
@@ -150,12 +204,16 @@ services:
       context: .
       dockerfile: report-service/Dockerfile
     container_name: report-service
+    restart: always
     environment:
       SPRING_CONFIG_IMPORT: configserver:http://config-server:8888
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/report_db
     depends_on:
-      - api-gateway
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
     networks:
       - travel-network
 
@@ -165,8 +223,11 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: frontend
+    restart: always
+    # 3001 (no 3000) para coexistir con el frontend de otro proyecto local
+    # que ya ocupe el 3000.
     ports:
-      - "3000:80"
+      - "3001:80"
     depends_on:
       - package-service
       - search-service

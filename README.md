@@ -51,8 +51,8 @@ Servicios accesibles desde el host:
 - Eureka Dashboard: http://localhost:8761
 - Config Server: http://localhost:8888
 - API Gateway: http://localhost:8080/api/...
-- Frontend: http://localhost:3000
-- PostgreSQL: localhost:5432 (usuario/clave: `postgres`/`postgres`)
+- Frontend: http://localhost:3001
+- PostgreSQL: localhost:5433 (usuario/clave: `postgres`/`postgres`)
 
 Para detener y eliminar los contenedores:
 
