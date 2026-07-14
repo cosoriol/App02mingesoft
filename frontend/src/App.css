@@ -681,6 +681,29 @@ h1, h2, h3 {
   align-items: center;
 }
 
+/* --- Administracion de paquetes (Epica 2) --- */
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.package-admin-card {
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.package-admin-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
 /* --- Reportes (dashboard, Epica 7) --- */
 .report-section {
   margin-top: 2rem;

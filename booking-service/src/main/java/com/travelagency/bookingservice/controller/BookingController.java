@@ -35,10 +35,10 @@ public class BookingController {
         return bookingService.createBooking(userId, request);
     }
 
-    // Solo administradores (ver BookingService.validateIsAdmin)
+    // Solo administradores (ver BookingService.validateRoleIsAdmin)
     @GetMapping
-    public List<BookingResponse> getAllBookings(@RequestParam String userId) {
-        return bookingService.getAllBookings(userId);
+    public List<BookingResponse> getAllBookings(@RequestParam String role) {
+        return bookingService.getAllBookings(role);
     }
 
     @GetMapping("/user/{userId}")

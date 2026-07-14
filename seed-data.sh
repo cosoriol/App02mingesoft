@@ -56,7 +56,7 @@ ensure_package() {
     echo "$existing_id"
     return
   fi
-  curl -s -X POST "$BASE_URL/packages" -H "Content-Type: application/json" -d "{
+  curl -s -X POST "$BASE_URL/packages?role=ADMIN" -H "Content-Type: application/json" -d "{
     \"name\": \"$name\", \"destination\": \"$destination\", \"description\": \"$description\",
     \"startDate\": \"$start\", \"endDate\": \"$end\", \"price\": $price, \"totalSlots\": $slots,
     \"includedServices\": \"$services\", \"restrictions\": \"$restrictions\",
@@ -111,8 +111,9 @@ else
   read -r B7 B7_AMT <<< "$(create_booking "$JUAN_ID" "$P4" 1)"
   curl -s -X PATCH "$BASE_URL/confirmations/$B7/cancel?userId=$JUAN_ID&role=CLIENT" >/dev/null
 
-  # Reserva expirada: se fuerza el estado directo en la base (no hay tarea programada
-  # de expiracion automatica en este proyecto todavia); se liberan los cupos a mano.
+  # Reserva expirada: se fuerza el estado directo en la base en vez de esperar los 30 min
+  # reales que tarda BookingService.markAsExpired() (corre cada 5 min); se liberan los
+  # cupos a mano, igual que haria esa tarea.
   read -r B8 B8_AMT <<< "$(create_booking "$MARIA_ID" "$P1" 3)"
   psql_query booking_db "UPDATE bookings SET status='EXPIRED', created_at = created_at - INTERVAL '1 hour' WHERE id=$B8;"
   psql_query package_db "UPDATE travel_packages SET booked_slots = booked_slots - 3 WHERE id=$P1;"

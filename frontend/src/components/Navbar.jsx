@@ -21,6 +21,8 @@ function Navbar() {
         <div className="navbar-links">
           <Link to="/home">Paquetes</Link>
           <Link to="/my-bookings">Mis reservas</Link>
+          {isAdmin && <Link to="/admin/packages">Paquetes (Admin)</Link>}
+          {isAdmin && <Link to="/admin/bookings">Reservas (Admin)</Link>}
           {isAdmin && <Link to="/reports">Reportes</Link>}
           <span className="navbar-user">Bienvenido, {userName || 'Usuario'}</span>
           <button type="button" className="btn btn-outline btn-small" onClick={handleLogout}>

@@ -91,8 +91,8 @@ public class BookingService {
 
     // Solo un administrador puede listar todas las reservas
     @Transactional(readOnly = true)
-    public List<BookingResponse> getAllBookings(String userId) {
-        validateIsAdmin(userId);
+    public List<BookingResponse> getAllBookings(String role) {
+        validateRoleIsAdmin(role);
         return bookingRepository.findAll().stream()
                 .map(booking -> toResponse(booking, fetchPackageSafely(booking.getPackageId())))
                 .toList();
@@ -214,9 +214,11 @@ public class BookingService {
         }
     }
 
-    private void validateIsAdmin(String userId) {
-        validateUserId(userId);
-        if (!isAdmin(userId)) {
+    // Distinto de isAdmin(userId) (bypass interno de ownership, ver validateOwnership): este
+    // valida el rol real de user-service, que el llamador (frontend) envia explicitamente,
+    // igual que package-service/report-service/confirmation-service.
+    private void validateRoleIsAdmin(String role) {
+        if (!"ADMIN".equalsIgnoreCase(role)) {
             throw new UnauthorizedAccessException("Solo un administrador puede listar todas las reservas");
         }
     }

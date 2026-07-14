@@ -51,8 +51,11 @@ public class BookingServiceClient {
         return exchangeList(url);
     }
 
+    // booking-service.getAllBookings ya valida el rol real (no el sentinel SYSTEM_USER_ID,
+    // ver BookingService.validateRoleIsAdmin) -- este metodo solo se llama despues de que
+    // ConfirmationService.validateIsAdmin(role) ya confirmo que quien pregunta es ADMIN.
     public List<BookingResponse> getAllBookings() {
-        String url = resolveBaseUrl() + "/api/bookings?userId=" + SYSTEM_USER_ID;
+        String url = resolveBaseUrl() + "/api/bookings?role=ADMIN";
         return exchangeList(url);
     }
 

@@ -46,10 +46,34 @@ export function searchPackages(filters) {
   return api.get('/packages/search', { params }).then((res) => res.data)
 }
 
+// Administracion de paquetes (Epica 2): solo ADMIN, revalidado en package-service.
+export function getAllPackagesAdmin(role) {
+  return api.get('/packages', { params: { role } }).then((res) => res.data)
+}
+
+export function createPackage(role, payload) {
+  return api.post('/packages', payload, { params: { role } }).then((res) => res.data)
+}
+
+export function updatePackage(id, role, payload) {
+  return api.put(`/packages/${id}`, payload, { params: { role } }).then((res) => res.data)
+}
+
+export function changePackageStatus(id, status, role) {
+  return api.patch(`/packages/${id}/status`, null, { params: { status, role } }).then((res) => res.data)
+}
+
 // --- Reservas (booking-service) ---
 
 export function createBooking(userId, booking) {
   return api.post('/bookings', booking, { params: { userId } }).then((res) => res.data)
+}
+
+// Administracion de reservas (Epica 6): solo ADMIN, revalidado en confirmation-service.
+// Via /confirmations (no /bookings) porque ya devuelve el estado legible y el pago
+// asociado, igual que "Mis reservas" -- misma fuente de datos, sin filtrar por dueno.
+export function getAllBookingsAdmin(role) {
+  return api.get('/confirmations', { params: { role } }).then((res) => res.data)
 }
 
 // --- Pagos (payment-service) ---
