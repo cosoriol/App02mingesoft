@@ -35,6 +35,7 @@ services:
 
   # Servidor de configuracion centralizada
   config-server:
+    image: cosoriol/travel-agency-app02-config-server:latest
     build:
       context: .
       dockerfile: config-server/Dockerfile
@@ -58,6 +59,7 @@ services:
 
   # Servidor de descubrimiento de servicios (Eureka)
   eureka-server:
+    image: cosoriol/travel-agency-app02-eureka-server:latest
     build:
       context: .
       dockerfile: eureka-server/Dockerfile
@@ -81,6 +83,7 @@ services:
 
   # Puerta de enlace (API Gateway)
   api-gateway:
+    image: cosoriol/travel-agency-app02-api-gateway:latest
     build:
       context: .
       dockerfile: api-gateway/Dockerfile
@@ -105,6 +108,7 @@ services:
 
   # Microservicio de usuarios y autenticacion (Epica 1)
   user-service:
+    image: cosoriol/travel-agency-app02-user-service:latest
     build:
       context: .
       dockerfile: user-service/Dockerfile
@@ -124,6 +128,7 @@ services:
 
   # Microservicio de paquetes turisticos
   package-service:
+    image: cosoriol/travel-agency-app02-package-service:latest
     build:
       context: .
       dockerfile: package-service/Dockerfile
@@ -143,6 +148,7 @@ services:
 
   # Microservicio de busqueda
   search-service:
+    image: cosoriol/travel-agency-app02-search-service:latest
     build:
       context: .
       dockerfile: search-service/Dockerfile
@@ -162,6 +168,7 @@ services:
 
   # Microservicio de reservas
   booking-service:
+    image: cosoriol/travel-agency-app02-booking-service:latest
     build:
       context: .
       dockerfile: booking-service/Dockerfile
@@ -181,6 +188,7 @@ services:
 
   # Microservicio de pagos
   payment-service:
+    image: cosoriol/travel-agency-app02-payment-service:latest
     build:
       context: .
       dockerfile: payment-service/Dockerfile
@@ -200,6 +208,7 @@ services:
 
   # Microservicio de confirmaciones
   confirmation-service:
+    image: cosoriol/travel-agency-app02-confirmation-service:latest
     build:
       context: .
       dockerfile: confirmation-service/Dockerfile
@@ -219,6 +228,7 @@ services:
 
   # Microservicio de reportes
   report-service:
+    image: cosoriol/travel-agency-app02-report-service:latest
     build:
       context: .
       dockerfile: report-service/Dockerfile
@@ -238,6 +248,7 @@ services:
 
   # Frontend React servido por Nginx
   frontend:
+    image: cosoriol/travel-agency-app02-frontend:latest
     build:
       context: ./frontend
       dockerfile: Dockerfile
